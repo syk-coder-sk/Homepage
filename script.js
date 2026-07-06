@@ -18,10 +18,10 @@ function layout() {
   const w = stage.clientWidth, h = stage.clientHeight;
   const wide = w > 760;
   const pos = wide
-    ? [[12, 26], [68, 20], [20, 68], [72, 64], [44, 80]]
-    : [[8, 20], [52, 16], [10, 72], [54, 68], [30, 86]];
+    ? [[12, 26], [68, 20], [20, 68], [72, 64]]
+    : [[8, 20], [52, 16], [10, 72], [54, 68]];
   btns.forEach((b, i) => {
-    if (b.dataset.moved) return; // 一度動かしたボタンは動かさない
+    if (b.dataset.moved) return;
     const [px, py] = pos[i];
     b.style.left = (w * px / 100) + 'px';
     b.style.top  = (h * py / 100) + 'px';
