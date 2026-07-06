@@ -94,3 +94,45 @@ window.resetForm = () => {
   document.getElementById('done').classList.remove('show');
   form.style.display = 'block';
 };
+
+// ===== 浮遊お問い合わせボタンをドラッグ =====
+(function(){
+  const cta = document.getElementById('floatCta');
+  if (!cta) return;
+
+  let active = false, sx, sy, ox, oy, moved = false;
+
+  cta.addEventListener('pointerdown', e => {
+    active = true; moved = false;
+    sx = e.clientX; sy = e.clientY;
+    const r = cta.getBoundingClientRect();
+    ox = r.left; oy = r.top;
+    cta.setPointerCapture(e.pointerId);
+    cta.classList.add('grabbed');
+  });
+  cta.addEventListener('pointermove', e => {
+    if (!active) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
+    let nx = ox + dx, ny = oy + dy;
+    // 画面内に収める
+    nx = Math.max(4, Math.min(nx, innerWidth  - cta.offsetWidth  - 4));
+    ny = Math.max(4, Math.min(ny, innerHeight - cta.offsetHeight - 4));
+    cta.style.left = nx + 'px';
+    cta.style.top  = ny + 'px';
+    cta.style.right = 'auto'; // 初期のright指定を解除
+  });
+  const end = e => {
+    if (!active) return;
+    cta.classList.remove('grabbed');
+    if (moved) {
+      e.preventDefault(); // ドラッグ後はリンク発火を抑制
+    }
+    active = false;
+  };
+  cta.addEventListener('pointerup', end);
+  cta.addEventListener('pointercancel', end);
+  cta.addEventListener('click', e => {
+    if (moved) { e.preventDefault(); moved = false; }
+  });
+})();
