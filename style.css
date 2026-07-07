@@ -248,3 +248,9 @@ footer .cr{font-family:var(--px);font-size:.48rem;color:#8ea3cd;margin-top:18px;
   .gbtn2{font-size:.52rem;padding:12px 12px}
   .gbtn2 .jp{font-size:.74rem}
 }
+/* ===== SHOWCASE 見出し + ステージのラッパ ===== */
+.showcase-wrap{margin-top:26px}
+.showcase-head{margin-bottom:14px}
+.showcase-head .kkick{margin-bottom:10px}
+.showcase-head h3{font-family:var(--px);font-size:.82rem;color:var(--navy);margin-bottom:8px;line-height:1.6;text-shadow:2px 2px 0 #c9d9f2}
+.showcase-head p{color:var(--soft);font-size:.9rem;max-width:36em}
