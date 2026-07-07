@@ -136,3 +136,16 @@ window.resetForm = () => {
     if (moved) { e.preventDefault(); moved = false; }
   });
 })();
+
+// ===== お問い合わせセクションに来たら浮遊ボタンを隠す =====
+(function(){
+  const cta = document.getElementById('floatCta');
+  const contactSec = document.getElementById('contact');
+  if (!cta || !contactSec) return;
+
+  const io = new IntersectionObserver(
+    entries => entries.forEach(e => cta.classList.toggle('is-hidden', e.isIntersecting)),
+    { threshold: 0.15 }
+  );
+  io.observe(contactSec);
+})();
