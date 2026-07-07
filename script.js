@@ -143,9 +143,13 @@ window.resetForm = () => {
   const contactSec = document.getElementById('contact');
   if (!cta || !contactSec) return;
 
-  const io = new IntersectionObserver(
-    entries => entries.forEach(e => cta.classList.toggle('is-hidden', e.isIntersecting)),
-    { threshold: 0.15 }
-  );
-  io.observe(contactSec);
+  const checkVisible = () => {
+    const rect = contactSec.getBoundingClientRect();
+    const hidden = rect.top < innerHeight * 0.6;
+    cta.classList.toggle('is-hidden', hidden);
+  };
+
+  checkVisible();
+  addEventListener('scroll', checkVisible, { passive: true });
+  addEventListener('resize', checkVisible);
 })();
