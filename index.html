@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LinkWorks沖縄 - GAME START</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0f1a;
+    --bg2:#161a2c;
+    --cyan:#3ff0ff;
+    --magenta:#ff3d9a;
+    --amber:#ffd23f;
+    --ink:#eef0ff;
+    --panel:#1c2036;
+    --border:#3a4066;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    height:100%;
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'DotGothic16', sans-serif;
+    overflow:hidden; /* 画面内に収める・スクロールさせない */
+    overscroll-behavior:none;
+  }
+  /* ===== starfield / grid bg ===== */
+  .bg-grid{
+    position:fixed; inset:0; z-index:0;
+    background-image:
+      linear-gradient(rgba(63,240,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(63,240,255,0.06) 1px, transparent 1px);
+    background-size:40px 40px;
+    animation:gridMove 14s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes gridMove{ from{background-position:0 0;} to{background-position:40px 40px;} }
+  .stars{position:fixed; inset:0; z-index:0; pointer-events:none;}
+  .star{
+    position:absolute; width:2px; height:2px; background:var(--ink); opacity:.6;
+    animation:twinkle 3s ease-in-out infinite;
+  }
+  @keyframes twinkle{ 0%,100%{opacity:.2;} 50%{opacity:1;} }
+
+  /* ===== BACKGROUND SPACE GAME ===== */
+  .space-game{
+    position:fixed; inset:0; z-index:0;
+    pointer-events:none; /* サイトの操作は絶対に邪魔しない */
+  }
+  .game-hud{
+    position:fixed; top:64px; left:22px; z-index:2;
+    font-family:'Press Start 2P', monospace;
+    font-size:9px; color:var(--amber); opacity:.7;
+    pointer-events:none;
+    text-shadow:2px 2px 0 rgba(0,0,0,.4);
+  }
+
+  .page{
+    position:relative; z-index:1;
+    height:100vh;
+    height:100dvh; /* スマホのアドレスバー分の誤差を吸収 */
+    display:flex;
+    flex-direction:column;
+  }
+
+  header{
+    flex:0 0 auto;
+    position:relative; z-index:5;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 28px;
+    border-bottom:2px solid var(--border);
+    background:rgba(13,15,26,0.85);
+    backdrop-filter:blur(4px);
+  }
+  .logo{
+    font-family:'Press Start 2P', monospace;
+    font-size:13px;
+    color:var(--cyan);
+    letter-spacing:1px;
+    text-shadow:2px 2px 0 var(--magenta);
+  }
+  nav.top-links{display:flex; gap:22px; font-size:12px;}
+  nav.top-links a{
+    color:var(--ink); text-decoration:none; opacity:.75;
+    border-bottom:2px solid transparent; padding-bottom:4px;
+  }
+  nav.top-links a:hover{opacity:1; border-color:var(--amber); color:var(--amber);}
+
+  /* ===== STAGE (残り全部をここに収める) ===== */
+  .stage{
+    flex:1 1 auto;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:0;
+  }
+
+  /* ===== LEFT SIDEBAR : SERVICE ===== */
+  .sidebar{
+    position:absolute;
+    left:24px; top:50%; transform:translateY(-50%);
+    z-index:4;
+    width:180px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .sidebar-title{
+    font-family:'Press Start 2P', monospace;
+    font-size:11px; color:var(--amber);
+    letter-spacing:1px; margin-bottom:2px;
+  }
+  .mini-card{
+    background:var(--panel); border:2px solid var(--border);
+    padding:10px 12px; display:flex; align-items:center; gap:10px;
+    transition:.2s;
+  }
+  .mini-card .icon{font-size:16px; flex:0 0 auto;}
+  .mini-card .txt{font-size:10px; line-height:1.5;}
+  .mini-card .txt b{
+    display:block; font-family:'Press Start 2P', monospace;
+    font-size:9px; color:var(--ink); margin-bottom:3px;
+  }
+  .mini-card:hover{border-color:var(--cyan); transform:translateX(4px);}
+  .mini-card:nth-child(3):hover{border-color:var(--magenta);}
+  .mini-card:nth-child(4):hover{border-color:var(--amber);}
+
+  /* ===== HERO (中央・コンパクト) ===== */
+  .hero{
+    position:relative; z-index:3;
+    text-align:center;
+  }
+  .kv-frame{
+    border:3px solid var(--cyan);
+    box-shadow:0 0 0 4px var(--bg), 0 0 24px rgba(63,240,255,0.4);
+    padding:26px 32px;
+    background:radial-gradient(circle at 30% 20%, rgba(255,61,154,0.12), transparent 60%),
+               radial-gradient(circle at 70% 80%, rgba(63,240,255,0.12), transparent 60%),
+               var(--bg2);
+    max-width:600px;
+  }
+  .eyebrow{
+    font-family:'Press Start 2P', monospace;
+    font-size:9px; color:var(--amber); letter-spacing:2px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{content:"▶ ";}
+  h1{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(20px, 4vw, 34px);
+    line-height:1.5;
+    margin:0 0 14px;
+    color:var(--ink);
+    text-shadow:3px 3px 0 var(--magenta), 6px 6px 0 rgba(63,240,255,0.4);
+  }
+  .hero p{font-size:13px; line-height:1.7; opacity:.85; margin:0 0 20px;}
+  .press-start{
+    display:inline-block;
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    color:var(--bg);
+    background:var(--amber);
+    padding:13px 28px;
+    border:none;
+    cursor:pointer;
+    box-shadow:4px 4px 0 var(--magenta);
+    animation:blink 1.6s steps(2) infinite;
+    text-decoration:none;
+  }
+  @keyframes blink{ 50%{ box-shadow:4px 4px 0 var(--cyan); } }
+  .press-start:hover{ transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--magenta); }
+
+  /* ===== NEWS POPUP ===== */
+  .news-stack{
+    position:absolute; top:20px; right:24px; z-index:5;
+    display:flex; flex-direction:column; gap:8px;
+    width:250px;
+  }
+  .news-card{
+    background:var(--panel);
+    border:2px solid var(--cyan);
+    padding:9px 12px;
+    font-size:10px;
+    position:relative;
+    box-shadow:3px 3px 0 rgba(0,0,0,.5);
+    animation:pop-in .4s ease-out backwards;
+  }
+  .news-card:nth-child(2){animation-delay:.15s; border-color:var(--magenta);}
+  .news-card:nth-child(3){animation-delay:.3s; border-color:var(--amber);}
+  @keyframes pop-in{ from{ opacity:0; transform:translateX(30px);} to{opacity:1; transform:translateX(0);} }
+  .news-date{color:var(--amber); font-family:'Press Start 2P',monospace; font-size:7px; margin-bottom:5px; display:block;}
+  .news-close{
+    position:absolute; top:4px; right:6px; cursor:pointer; opacity:.5; font-size:11px; color:var(--ink);
+  }
+  .news-close:hover{opacity:1;}
+
+  /* ===== FLOATING NAV ORBS (画面全体をドラッグ範囲にする) ===== */
+  .orbit-nav{
+    position:absolute; inset:0;
+    z-index:6;
+    display:flex; align-items:flex-end; justify-content:center;
+    gap:22px;
+    padding:0 20px 26px;
+    pointer-events:none; /* 下の要素を邪魔しない。orb自体だけ操作可 */
+  }
+  .orb{
+    pointer-events:auto;
+    width:92px; height:92px;
+    border-radius:50%;
+    border:2px solid var(--border);
+    background:var(--panel);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'Press Start 2P', monospace;
+    font-size:8px; text-align:center; gap:6px;
+    color:var(--ink); text-decoration:none;
+    animation:float 4s ease-in-out infinite;
+    transition:box-shadow .2s, border-color .2s;
+    cursor:grab;
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+    -webkit-user-drag:none;   /* ブラウザ標準のリンクドラッグを無効化 */
+    -khtml-user-drag:none;
+    -moz-user-drag:none;
+    user-drag:none;
+  }
+  .orb:nth-child(2){animation-delay:.3s;}
+  .orb:nth-child(3){animation-delay:.6s;}
+  .orb:nth-child(4){animation-delay:.9s;}
+  .orb:nth-child(5){animation-delay:1.2s;}
+  @keyframes float{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+  .orb .icon{font-size:19px;}
+  .orb:hover{
+    border-color:var(--cyan);
+    box-shadow:0 0 18px rgba(63,240,255,0.5);
+  }
+  .orb.m2:hover{border-color:var(--magenta); box-shadow:0 0 18px rgba(255,61,154,0.5);}
+  .orb.m3:hover{border-color:var(--amber); box-shadow:0 0 18px rgba(255,210,63,0.5);}
+
+  .orbit-nav.draggable-ready .orb{
+    position:absolute;
+  }
+  .orb.dragging{
+    cursor:grabbing;
+    z-index:10;
+    border-color:var(--amber) !important;
+    box-shadow:0 0 22px rgba(255,210,63,0.6) !important;
+    transition:none;
+    animation-play-state:paused;
+    transform:none !important;
+  }
+
+  footer{
+    flex:0 0 auto;
+    text-align:center; padding:8px;
+    font-size:8px; opacity:.4;
+    font-family:'Press Start 2P',monospace;
+    position:relative; z-index:2;
+  }
+
+  @media (max-width:900px){
+    .sidebar{ display:none; } /* 狭い画面ではサイドバーは隠す（優先度はhero/nav） */
+    nav.top-links{display:none;}
+  }
+
+  /* ===== スマホ向け ===== */
+  @media (max-width:700px){
+    header{ padding:10px 14px; }
+    .logo{ font-size:10px; }
+
+    .stage{ padding:4px; }
+
+    .kv-frame{
+      max-width:92vw;
+      padding:18px 16px;
+      box-shadow:0 0 0 3px var(--bg), 0 0 16px rgba(63,240,255,0.4);
+    }
+    .eyebrow{ font-size:7px; margin-bottom:10px; }
+    h1{ font-size:clamp(16px, 7vw, 26px); margin:0 0 10px; }
+    .hero p{ font-size:10.5px; line-height:1.6; margin:0 0 14px; }
+    .press-start{ font-size:10px; padding:10px 18px; }
+
+    .news-stack{
+      width:132px;
+      top:8px; right:8px;
+      gap:5px;
+    }
+    .news-card{ padding:6px 8px; font-size:8px; }
+    .news-date{ font-size:6px; margin-bottom:3px; }
+    .news-close{ font-size:9px; top:2px; right:4px; }
+
+    .orbit-nav{ gap:10px; padding:0 8px 10px; }
+    .orb{ width:62px; height:62px; font-size:6px; gap:3px; border-width:2px; }
+    .orb .icon{ font-size:14px; }
+
+    .game-hud{ top:52px; left:12px; font-size:7px; }
+
+    footer{ font-size:6px; padding:5px; }
+  }
+
+  /* 画面が低い（横向き・小型端末）場合はさらに詰める */
+  @media (max-height:480px){
+    .kv-frame{ padding:12px 16px; }
+    .eyebrow{ margin-bottom:6px; }
+    h1{ margin:0 0 6px; }
+    .hero p{ margin:0 0 8px; }
+    .press-start{ padding:8px 16px; }
+    .news-stack{ top:6px; }
+    .orb{ width:50px; height:50px; }
+    .orb .icon{ font-size:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="stars" id="stars"></div>
+<canvas id="spaceGame" class="space-game"></canvas>
+<div class="game-hud" id="gameHud">SCORE 0000</div>
+
+<div class="page">
+  <header>
+    <div class="logo">LinkWorks OKINAWA</div>
+    <nav class="top-links">
+      <a href="#">ABOUT</a>
+      <a href="#">SERVICE</a>
+      <a href="#">CONTACT</a>
+    </nav>
+  </header>
+
+  <div class="stage" id="stage">
+
+    <aside class="sidebar">
+      <div class="sidebar-title">◆ SERVICE</div>
+      <div class="mini-card">
+        <span class="icon">🖥️</span>
+        <span class="txt"><b>WEB SYSTEM</b>業務システム・サイト開発</span>
+      </div>
+      <div class="mini-card">
+        <span class="icon">☁️</span>
+        <span class="txt"><b>SaaS</b>自社プロダクト提供</span>
+      </div>
+      <div class="mini-card">
+        <span class="icon">🎓</span>
+        <span class="txt"><b>ICT</b>学校ICT支援・教育</span>
+      </div>
+    </aside>
+
+    <div class="news-stack" id="newsStack">
+      <div class="news-card">
+        <span class="news-close" onclick="this.parentElement.remove()">✕</span>
+        <span class="news-date">2026.07.14</span>
+        公式サイトをリニューアルしました！
+      </div>
+      <div class="news-card">
+        <span class="news-close" onclick="this.parentElement.remove()">✕</span>
+        <span class="news-date">2026.07.10</span>
+        沖縄県内の学校向けICT支援、新規受付開始
+      </div>
+      <div class="news-card">
+        <span class="news-close" onclick="this.parentElement.remove()">✕</span>
+        <span class="news-date">2026.07.02</span>
+        SaaSプロダクトのβ版デモを公開しました
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="kv-frame">
+        <div class="eyebrow">LEVEL UP YOUR BUSINESS</div>
+        <h1>LinkWorks<br>沖縄</h1>
+        <p>WEBシステム開発 × SaaS × ICT教育支援<br>沖縄から、次のステージへ。</p>
+        <a href="#" class="press-start">PRESS START</a>
+      </div>
+    </div>
+
+    <div class="orbit-nav" id="orbitNav">
+      <a class="orb" draggable="false" href="#web-system"><span class="icon">🖥️</span>WEB<br>SYSTEM</a>
+      <a class="orb m2" draggable="false" href="#saas"><span class="icon">☁️</span>SaaS</a>
+      <a class="orb m3" draggable="false" href="#ict"><span class="icon">🎓</span>ICT</a>
+      <a class="orb" draggable="false" href="#contact"><span class="icon">✉️</span>CONTACT</a>
+      <a class="orb m2" draggable="false" href="#faq"><span class="icon">❓</span>FAQ</a>
+    </div>
+
+  </div>
+
+  <footer>
+    ALL RIGHTS RESERVED 2026 © LinkWorks OKINAWA
+  </footer>
+</div>
+
+<script>
+  const starsEl = document.getElementById('stars');
+  for(let i=0;i<50;i++){
+    const s = document.createElement('div');
+    s.className='star';
+    s.style.left = Math.random()*100+'vw';
+    s.style.top = Math.random()*100+'vh';
+    s.style.animationDelay = (Math.random()*3)+'s';
+    starsEl.appendChild(s);
+  }
+
+  // ===== draggable nav orbs : ドラッグ範囲は画面(stage)全体 =====
+  const nav = document.getElementById('orbitNav');
+  const orbs = Array.from(nav.querySelectorAll('.orb'));
+
+  function activateDragMode(){
+    const navRect = nav.getBoundingClientRect();
+    orbs.forEach(orb => {
+      const r = orb.getBoundingClientRect();
+      orb.style.left = (r.left - navRect.left) + 'px';
+      orb.style.top  = (r.top  - navRect.top)  + 'px';
+    });
+    nav.classList.add('draggable-ready');
+  }
+  window.addEventListener('load', () => setTimeout(activateDragMode, 50));
+
+  orbs.forEach(orb => {
+    orb.addEventListener('dragstart', (e) => e.preventDefault()); // 保険：ブラウザ標準ドラッグを完全に封じる
+    let dragging = false;
+    let moved = false;
+    let startX, startY, startLeft, startTop;
+
+    orb.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      moved = false;
+      orb.setPointerCapture(e.pointerId);
+      orb.classList.add('dragging'); // 浮遊アニメを一時停止してtransformをリセット
+      void orb.offsetWidth; // reflow
+
+      const navRect = nav.getBoundingClientRect();
+      const r = orb.getBoundingClientRect();
+      startLeft = r.left - navRect.left;
+      startTop  = r.top  - navRect.top;
+      orb.style.left = startLeft + 'px';
+      orb.style.top  = startTop  + 'px';
+
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+
+    orb.addEventListener('pointermove', (e) => {
+      if(!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if(Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
+
+      const navRect = nav.getBoundingClientRect();
+      let newLeft = startLeft + dx;
+      let newTop  = startTop  + dy;
+      // stage(画面)全体の中に収める
+      newLeft = Math.max(0, Math.min(newLeft, navRect.width  - orb.offsetWidth));
+      newTop  = Math.max(0, Math.min(newTop,  navRect.height - orb.offsetHeight));
+      orb.style.left = newLeft + 'px';
+      orb.style.top  = newTop  + 'px';
+    });
+
+    function endDrag(e){
+      if(!dragging) return;
+      dragging = false;
+      orb.classList.remove('dragging');
+      if(moved) e.preventDefault();
+    }
+    orb.addEventListener('pointerup', endDrag);
+    orb.addEventListener('pointercancel', endDrag);
+    orb.addEventListener('click', (e) => { if(moved) e.preventDefault(); });
+  });
+
+  window.addEventListener('resize', () => {
+    const navRect = nav.getBoundingClientRect();
+    orbs.forEach(orb => {
+      let left = parseFloat(orb.style.left || 0);
+      let top  = parseFloat(orb.style.top  || 0);
+      left = Math.max(0, Math.min(left, navRect.width  - orb.offsetWidth));
+      top  = Math.max(0, Math.min(top,  navRect.height - orb.offsetHeight));
+      orb.style.left = left + 'px';
+      orb.style.top  = top + 'px';
+    });
+  });
+
+  // ===== 背景スペースゲーム：カーソル/指で自機を動かして隕石をよける =====
+  (function(){
+    const canvas = document.getElementById('spaceGame');
+    const ctx = canvas.getContext('2d');
+    const hud = document.getElementById('gameHud');
+    let W, H, DPR;
+
+    function resizeCanvas(){
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width  = W * DPR;
+      canvas.height = H * DPR;
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const ship = { x: 0, y: 0, tx: 0, ty: 0, size: 13 };
+    function setInitialShipPos(){
+      ship.x = ship.tx = W / 2;
+      ship.y = ship.ty = H * 0.82;
+    }
+    setInitialShipPos();
+
+    // カーソル/指の位置を自機の目標地点にする。UI操作は邪魔しない（canvasはpointer-events:none）
+    window.addEventListener('pointermove', (e) => {
+      ship.tx = e.clientX;
+      ship.ty = e.clientY;
+    });
+
+    let asteroids = [];
+    let spawnTimer = 0;
+    let score = 0;
+    let flash = 0;
+    const colors = ['#3ff0ff', '#ff3d9a', '#ffd23f'];
+
+    function spawnAsteroid(){
+      const size = 8 + Math.random() * 16;
+      asteroids.push({
+        x: Math.random() * W,
+        y: -size,
+        size,
+        speed: 40 + Math.random() * 55 + Math.min(score * 0.15, 60),
+        rot: Math.random() * Math.PI,
+        rotSpeed: (Math.random() - 0.5) * 2,
+        color: colors[Math.floor(Math.random() * colors.length)]
+      });
+    }
+
+    function drawShip(){
+      ctx.save();
+      ctx.translate(ship.x, ship.y);
+      ctx.shadowColor = '#3ff0ff';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#3ff0ff';
+      ctx.beginPath();
+      ctx.moveTo(0, -ship.size);
+      ctx.lineTo(ship.size * 0.7, ship.size * 0.8);
+      ctx.lineTo(0, ship.size * 0.4);
+      ctx.lineTo(-ship.size * 0.7, ship.size * 0.8);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#ffd23f';
+      ctx.globalAlpha = 0.5 + Math.random() * 0.4;
+      ctx.beginPath();
+      ctx.moveTo(-ship.size * 0.25, ship.size * 0.55);
+      ctx.lineTo(0, ship.size * 0.55 + 5 + Math.random() * 7);
+      ctx.lineTo(ship.size * 0.25, ship.size * 0.55);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawAsteroid(a){
+      ctx.save();
+      ctx.translate(a.x, a.y);
+      ctx.rotate(a.rot);
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = a.color;
+      ctx.fillRect(-a.size / 2, -a.size / 2, a.size, a.size);
+      ctx.restore();
+    }
+
+    let last = performance.now();
+    function loop(now){
+      const dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // 自機はイージングでなめらかに追従
+      ship.x += (ship.tx - ship.x) * Math.min(dt * 7, 1);
+      ship.y += (ship.ty - ship.y) * Math.min(dt * 7, 1);
+
+      // 隕石スポーン（スコアが伸びるほど少し速くなる）
+      spawnTimer += dt;
+      const interval = Math.max(0.32, 1.05 - score * 0.0015);
+      if(spawnTimer > interval){ spawnTimer = 0; spawnAsteroid(); }
+
+      for(let i = asteroids.length - 1; i >= 0; i--){
+        const a = asteroids[i];
+        a.y += a.speed * dt;
+        a.rot += a.rotSpeed * dt;
+
+        if(a.y - a.size > H){
+          asteroids.splice(i, 1);
+          score++;
+          continue;
+        }
+        const dx = a.x - ship.x, dy = a.y - ship.y;
+        if(Math.hypot(dx, dy) < a.size / 2 + ship.size * 0.55){
+          asteroids.splice(i, 1);
+          flash = 0.25;
+          continue;
+        }
+        drawAsteroid(a);
+      }
+
+      drawShip();
+
+      if(flash > 0){
+        flash -= dt;
+        ctx.fillStyle = `rgba(255,61,154,${Math.max(flash, 0) * 1.1})`;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      hud.textContent = 'SCORE ' + String(score).padStart(4, '0');
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  })();
+</script>
+
+</body>
+</html>
