@@ -277,3 +277,17 @@ footer .cr{font-family:var(--px);font-size:.48rem;color:#8ea3cd;margin-top:18px;
 @media(max-width:560px){
   .legal-panel{padding:26px 22px}
 }
+
+/* ===== 技術スタック（ABOUT内） ===== */
+.stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.stack-card{padding:22px 20px}
+.stack-head{font-family:var(--px);font-size:.6rem;color:var(--navy);margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--line);line-height:1.6}
+.stack-tags{display:flex;flex-wrap:wrap;gap:8px}
+.stack-tags .tag{font-family:var(--px);font-size:.5rem;color:var(--blue);background:rgba(59,111,224,.08);border:1.5px solid var(--blue);padding:6px 9px;letter-spacing:.02em;line-height:1.5}
+
+@media(max-width:900px){
+  .stack-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .stack-grid{grid-template-columns:1fr}
+}
