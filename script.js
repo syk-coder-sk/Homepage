@@ -89,8 +89,32 @@ form.addEventListener('submit', e => {
     form.querySelector('.fld.err input, .fld.err select')?.focus();
     return;
   }
-  form.style.display = 'none';
-  document.getElementById('done').classList.add('show');
+
+  const submitBtn = form.querySelector('.submit');
+  const originalLabel = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = '送信中…';
+
+  fetch(form.action, {
+    method: 'POST',
+    body: new FormData(form),
+    headers: { 'Accept': 'application/json' }
+  })
+  .then(res => {
+    if (res.ok) {
+      form.style.display = 'none';
+      document.getElementById('done').classList.add('show');
+    } else {
+      throw new Error('send failed');
+    }
+  })
+  .catch(() => {
+    alert('送信に失敗しました。お手数ですが、メールまたはお電話にてご連絡ください。');
+  })
+  .finally(() => {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalLabel;
+  });
 });
 
 window.resetForm = () => {
